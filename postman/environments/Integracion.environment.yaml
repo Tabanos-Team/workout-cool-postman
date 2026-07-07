@@ -1,6 +1,0 @@
-name: Integracion
-values:
-  - key: URLBase
-    value: ''
-  - key: URLBaseApi
-    value: ''

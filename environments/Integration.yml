@@ -1,0 +1,6 @@
+name: Integration
+variables:
+  - name: URLBase
+    value: http://127.0.0.1:3101
+  - name: URLBaseApi
+    value: http://127.0.0.1:3101/api
