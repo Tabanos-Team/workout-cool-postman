@@ -1,0 +1,6 @@
+name: Local
+values:
+  - key: URLBase
+    value: ''
+  - key: URLBaseApi
+    value: ''
