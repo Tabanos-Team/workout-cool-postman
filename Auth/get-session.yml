@@ -1,11 +1,11 @@
 info:
-  name: Sign-out
+  name: get-session
   type: http
-  seq: 2
+  seq: 7
 
 http:
-  method: POST
-  url: "{{URLBaseApi}}/auth/sign-out"
+  method: GET
+  url: "{{URLBaseApi}}/auth/session"
   auth: inherit
 
 settings:
