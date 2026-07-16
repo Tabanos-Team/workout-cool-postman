@@ -1,5 +1,5 @@
 info:
-  name: profile
+  name: get-profile
   type: http
   seq: 1
 
