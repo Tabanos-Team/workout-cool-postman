@@ -1,0 +1,36 @@
+info:
+  name: "N04: GET /api/exercises/:id/statistics (invalid ID - HTTP 404)"
+  type: http
+  seq: 104
+
+http:
+  method: GET
+  url: "{{URLBaseApi}}/exercises/00000000-0000-0000-0000-000000000000/statistics"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = typeof res.body === "string" ? JSON.parse(res.body || "{}") : res.body;
+
+        test("returns 404 for non-existent exercise", function() {
+          expect(res.status).to.equal(404);
+        });
+
+        test("error message indicates not found", function() {
+          expect(body).to.have.property("error");
+          expect(body.error.toLowerCase()).to.include("not found");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Negative case: GET /api/exercises/:id/statistics with non-existent ID.
+  Should return HTTP 404 with descriptive error message.
+  
+  Authentication required.
