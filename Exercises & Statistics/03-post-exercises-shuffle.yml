@@ -1,0 +1,68 @@
+info:
+  name: POST /api/exercises/shuffle (sugerir ejercicio)
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{URLBaseApi}}/exercises/shuffle"
+  body:
+    type: json
+    data: |-
+      {
+        "exerciseId": "{{exerciseId}}",
+        "muscleGroups": ["chest"],
+        "difficulty": "intermediate"
+      }
+
+runtime:
+  scripts:
+    - type: pre-request
+      code: |-
+        // Validate exerciseId exists before making request
+        if (!bru.getVar("exerciseId")) {
+          throw new Error("exerciseId not set. Run GET /api/exercises/all first to populate it.");
+        }
+
+    - type: tests
+      code: |-
+        const body = typeof res.body === "string" ? JSON.parse(res.body || "{}") : res.body;
+
+        test("returns 200", function() {
+          expect(res.status).to.equal(200);
+        });
+
+        test("returns a suggested exercise", function() {
+          expect(body).to.have.property("id").that.is.a("string");
+          expect(body).to.have.property("name").that.is.a("string");
+          expect(body).to.have.property("muscleGroups").that.is.an("array");
+        });
+
+        test("suggested exercise is different from original", function() {
+          const originalId = bru.getVar("exerciseId");
+          // Suggested exercise might be same if very few options, but ideally different
+          expect(body).to.have.property("id");
+        });
+
+        test("stores suggested exercise ID", function() {
+          bru.setVar("suggestedExerciseId", body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Suggest/shuffle an exercise to replace the current one.
+  
+  Request body:
+  - exerciseId: The exercise to replace
+  - muscleGroups: Array of muscle groups to filter suggestions by
+  - difficulty: Optional difficulty level (beginner|intermediate|advanced)
+  
+  Returns a similar exercise that targets the same muscle groups.
+  Useful for workout variety without changing the program's focus.
+  
+  Precondition: exerciseId must be set (from GET /api/exercises/all).

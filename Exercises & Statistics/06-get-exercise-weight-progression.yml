@@ -1,0 +1,87 @@
+info:
+  name: GET /api/exercises/:id/statistics/weight-progression
+  type: http
+  seq: 6
+
+http:
+  method: GET
+  url: "{{URLBaseApi}}/exercises/{{exerciseId}}/statistics/weight-progression"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: pre-request
+      code: |-
+        if (!bru.getVar("exerciseId")) {
+          throw new Error("exerciseId not set. Run GET /api/exercises/all first.");
+        }
+
+    - type: tests
+      code: |-
+        const body = typeof res.body === "string" ? JSON.parse(res.body || "{}") : res.body;
+
+        test("returns 200", function() {
+          expect(res.status).to.equal(200);
+        });
+
+        test("returns weight progression structure", function() {
+          expect(body).to.have.property("exerciseId").that.is.a("string");
+          expect(body).to.have.property("progression").that.is.an("array");
+          expect(body).to.have.property("trend").that.is.a("string");
+        });
+
+        test("trend is one of valid values", function() {
+          expect(["up", "stable", "down"]).to.include(body.trend);
+        });
+
+        test("progression is chronologically ordered", function() {
+          const dates = body.progression.map(p => new Date(p.date).getTime());
+          for (let i = 1; i < dates.length; i++) {
+            expect(dates[i]).to.be.greaterThanOrEqual(dates[i - 1]);
+          }
+        });
+
+        test("each progression entry has required fields", function() {
+          body.progression.forEach((entry, idx) => {
+            expect(entry).to.have.property("date", `Entry ${idx}: missing date`);
+            expect(entry).to.have.property("weight", `Entry ${idx}: missing weight`);
+            expect(entry.weight).to.be.a("number");
+            expect(entry.weight).to.be.greaterThanOrEqual(0);
+          });
+        });
+
+        test("trend matches progression data", function() {
+          if (body.progression.length >= 2) {
+            const first = body.progression[0].weight;
+            const last = body.progression[body.progression.length - 1].weight;
+            
+            if (body.trend === "up") {
+              expect(last).to.be.greaterThan(first);
+            } else if (body.trend === "down") {
+              expect(last).to.be.lessThan(first);
+            }
+            // For "stable", values are approximately equal
+          }
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Get weight progression for an exercise over time.
+  
+  Returns:
+  - progression: Array of weight data points
+    - date: ISO 8601 date
+    - weight: Maximum weight lifted that day
+  - trend: Overall trend (up|stable|down)
+  
+  Useful for:
+  - Visualizing strength gains
+  - Identifying plateaus
+  - Motivating users with progress data
+  
+  Authentication required.
