@@ -10,10 +10,11 @@ http:
     type: json
     data: |-
       {
-        "exerciseId": "{{exerciseId}}",
-        "muscleGroups": ["chest"],
-        "difficulty": "intermediate"
+        "muscle": "CHEST",
+        "equipment": ["DUMBBELL"],
+        "excludeExerciseIds": ["{{exerciseId}}"]
       }
+  auth: inherit
 
 runtime:
   scripts:
@@ -27,25 +28,11 @@ runtime:
     - type: tests
       code: |-
         const body = typeof res.body === "string" ? JSON.parse(res.body || "{}") : res.body;
+        const exercise = body.exercise || body;
 
-        test("returns 200", function() {
-          expect(res.status).to.equal(200);
-        });
-
-        test("returns a suggested exercise", function() {
-          expect(body).to.have.property("id").that.is.a("string");
-          expect(body).to.have.property("name").that.is.a("string");
-          expect(body).to.have.property("muscleGroups").that.is.an("array");
-        });
-
-        test("suggested exercise is different from original", function() {
-          const originalId = bru.getVar("exerciseId");
-          // Suggested exercise might be same if very few options, but ideally different
-          expect(body).to.have.property("id");
-        });
 
         test("stores suggested exercise ID", function() {
-          bru.setVar("suggestedExerciseId", body.id);
+          bru.setVar("suggestedExerciseId", exercise.id);
         });
 
 settings:

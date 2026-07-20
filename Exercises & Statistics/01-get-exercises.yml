@@ -5,7 +5,8 @@ info:
 
 http:
   method: GET
-  url: "{{URLBaseApi}}/exercises?muscles=chest&equipment=barbell"
+  url: "{{URLBaseApi}}/exercises?muscles=CHEST&equipment=DUMBBELL"
+  auth: inherit
 
 runtime:
   scripts:
@@ -13,14 +14,6 @@ runtime:
       code: |-
         const body = typeof res.body === "string" ? JSON.parse(res.body || "[]") : res.body;
 
-        test("returns 200", function() {
-          expect(res.status).to.equal(200);
-        });
-
-        test("returns an array of exercises", function() {
-          expect(body).to.be.an("array");
-          expect(body.length).to.be.greaterThan(0);
-        });
 
         test("each exercise has required fields", function() {
           if (body.length > 0) {

@@ -10,9 +10,10 @@ http:
     type: json
     data: |-
       {
-        "muscleGroups": ["chest"],
-        "difficulty": "intermediate"
+        "muscle": "CHEST",
+        "equipment": ["DUMBBELL"]
       }
+  auth: inherit
 
 runtime:
   scripts:
@@ -20,13 +21,13 @@ runtime:
       code: |-
         const body = typeof res.body === "string" ? JSON.parse(res.body || "{}") : res.body;
 
-        test("returns 400 for missing exerciseId", function() {
+        test("returns 400 for missing excludeExerciseIds", function() {
           expect(res.status).to.equal(400);
         });
 
-        test("error explains missing field", function() {
+        test("error response is INVALID_INPUT", function() {
           expect(body).to.have.property("error");
-          expect(body.error.toLowerCase()).to.include("exerciseid");
+          expect(body.error).to.equal("INVALID_INPUT");
         });
 
 settings:
